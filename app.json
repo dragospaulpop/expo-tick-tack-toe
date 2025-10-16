@@ -38,6 +38,12 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+      "expo-font",
+        {
+          "fonts": ["node_modules/@expo-google-fonts/roboto-mono/700Bold/RobotoMono_700Bold.ttf"]
+        }
       ]
     ],
     "experiments": {

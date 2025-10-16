@@ -36,7 +36,6 @@ export default function Row({ rowNumber, matrix, handleCellClick }: RowType) {
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
     flexGrow: 1,
     gap: 10,
   },
