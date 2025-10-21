@@ -1,4 +1,4 @@
-import { Matrix } from "@/app";
+import { Matrix } from "@/hooks/use-matrix-context";
 
 export type Winner = {
   winner: "X" | "O" | null;

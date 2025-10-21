@@ -22,7 +22,13 @@ export default function RootLayout() {
         <MatrixProvider>
           <Stack>
             <Stack.Screen
-              name="index"
+              name="login"
+              options={{
+                title: "Login",
+              }}
+            />
+            <Stack.Screen
+              name="game"
               options={{
                 title: "Tick Tack Toe",
                 headerRight: () => {
