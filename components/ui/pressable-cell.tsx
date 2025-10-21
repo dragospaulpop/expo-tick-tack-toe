@@ -1,4 +1,5 @@
-import { Matrix } from "@/app";
+import { useCurrentPlayerContext } from "@/hooks/use-current-player-context";
+import { useMatrixContext } from "@/hooks/use-matrix-context";
 import { isWinnigPosition } from "@/lib/check-winner";
 import { Pressable, StyleSheet } from "react-native";
 import { ThemedText } from "../themed-text";
@@ -6,19 +7,22 @@ import { ThemedText } from "../themed-text";
 type CellType = {
   cellNumber: number;
   rowNumber: number;
-  handleCellClick: (rowNumber: number, cellNumber: number) => void;
-  matrix: Matrix;
 };
 
-export default function PressableCell({
-  cellNumber,
-  rowNumber,
-  handleCellClick,
-  matrix,
-}: CellType) {
+export default function PressableCell({ cellNumber, rowNumber }: CellType) {
+  const { matrix, handleCellClick } = useMatrixContext();
+  const { currentPlayer, setCurrentPlayer } = useCurrentPlayerContext();
+
+  const handleClickEvent = (rowNumber: number, cellNumber: number) => {
+    handleCellClick(rowNumber, cellNumber, currentPlayer);
+    setCurrentPlayer((prevPlayer) => (prevPlayer === "X" ? "O" : "X"));
+  };
+
   return (
     <Pressable
-      onPress={() => handleCellClick(rowNumber, cellNumber)}
+      onPress={() => {
+        handleClickEvent(rowNumber, cellNumber);
+      }}
       style={styles.cell}
     >
       <ThemedText
@@ -47,6 +51,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 40,
     fontFamily: "RobotoMono_700Bold",
+    lineHeight: 44,
   },
   winningText: {
     color: "green",

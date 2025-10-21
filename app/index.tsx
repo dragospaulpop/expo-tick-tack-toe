@@ -1,44 +1,15 @@
 import { ThemedText } from "@/components/themed-text";
 import Row from "@/components/ui/row";
+import { useCurrentPlayerContext } from "@/hooks/use-current-player-context";
+import { useMatrixContext } from "@/hooks/use-matrix-context";
 import { checkWinner } from "@/lib/check-winner";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
-type MatrixCell = string;
-
-export type Matrix = [
-  [MatrixCell, MatrixCell, MatrixCell],
-  [MatrixCell, MatrixCell, MatrixCell],
-  [MatrixCell, MatrixCell, MatrixCell]
-];
-
 export default function Index() {
-  const [currentPlayer, setCurrentPlayer] = useState<"X" | "O" | null>("X");
-  const [matrix, setMatrix] = useState<Matrix>([
-    [" ", " ", " "],
-    [" ", " ", " "],
-    [" ", " ", " "],
-  ]);
+  const { currentPlayer, setCurrentPlayer } = useCurrentPlayerContext();
+  const { matrix } = useMatrixContext();
   const [message, setMessage] = useState<string>("Current player: X");
-
-  const handleCellClick = (rowNumber: number, cellNumber: number) => {
-    if (currentPlayer === null) {
-      return;
-    }
-
-    if (matrix[rowNumber][cellNumber] !== " ") {
-      return;
-    }
-
-    setMatrix((prevMatrix: Matrix) => {
-      const newMatrix: Matrix = [...prevMatrix];
-      const newRow = [...newMatrix[rowNumber]];
-      newRow[cellNumber] = currentPlayer;
-      newMatrix[rowNumber] = newRow as [MatrixCell, MatrixCell, MatrixCell];
-      return newMatrix;
-    });
-    setCurrentPlayer((prevPlayer) => (prevPlayer === "X" ? "O" : "X"));
-  };
 
   useEffect(() => {
     const winner = checkWinner(matrix);
@@ -46,7 +17,7 @@ export default function Index() {
       setMessage(`Player ${winner.winner} wins!`);
       setCurrentPlayer(null);
     }
-  }, [matrix, currentPlayer]);
+  }, [matrix, currentPlayer, setCurrentPlayer]);
 
   useEffect(() => {
     if (currentPlayer === null) {
@@ -57,10 +28,10 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Row rowNumber={0} handleCellClick={handleCellClick} matrix={matrix} />
-      <Row rowNumber={1} handleCellClick={handleCellClick} matrix={matrix} />
-      <Row rowNumber={2} handleCellClick={handleCellClick} matrix={matrix} />
-      <ThemedText>{message}</ThemedText>
+      <Row rowNumber={0} />
+      <Row rowNumber={1} />
+      <Row rowNumber={2} />
+      <ThemedText style={styles.counter}>{message}</ThemedText>
     </View>
   );
 }
@@ -74,5 +45,7 @@ const styles = StyleSheet.create({
   },
   counter: {
     fontSize: 40,
+
+    lineHeight: 44,
   },
 });
