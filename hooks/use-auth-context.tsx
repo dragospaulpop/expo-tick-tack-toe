@@ -1,7 +1,10 @@
+import { insertUserData } from "@/lib/data";
 import { auth } from "@/lib/firebase.config";
 import { FirebaseError } from "firebase/app";
 import {
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signOut,
   User,
@@ -13,9 +16,11 @@ import {
   useEffect,
   useState,
 } from "react";
+import { AppState } from "react-native";
 
 type AuthContextType = {
   user: User | null;
+  isVerified: boolean | null;
   login: (
     email: string,
     password: string
@@ -23,6 +28,14 @@ type AuthContextType = {
     success: boolean;
     error: FirebaseError | null;
   }>;
+  signup: (
+    email: string,
+    password: string
+  ) => Promise<{
+    success: boolean;
+    error: FirebaseError | null;
+  }>;
+  handleResendVerification: () => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -38,9 +51,31 @@ export function useAuthContext() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+
   const login = useCallback(async (email: string, password: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+
+      return { success: true, error: null };
+    } catch (error: FirebaseError | any) {
+      return { success: false, error };
+    }
+  }, []);
+
+  const signup = useCallback(async (email: string, password: string) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await insertUserData(userCredential.user.uid, {
+        email: userCredential.user.email,
+      });
+
+      await sendEmailVerification(userCredential.user);
 
       return { success: true, error: null };
     } catch (error: FirebaseError | any) {
@@ -56,9 +91,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const handleResendVerification = useCallback(async () => {
+    try {
+      if (user) {
+        await sendEmailVerification(user);
+      }
+    } catch (error: FirebaseError | any) {
+      console.log(error);
+    }
+  }, [user]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        setIsVerified(user.emailVerified);
         setUser(user);
       } else {
         setUser(null);
@@ -66,10 +112,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [setUser]);
+  }, [setUser, setIsVerified]);
+
+  useEffect(() => {
+    AppState.addEventListener("change", (nextAppState: any) => {
+      console.log("AppState changed to", nextAppState);
+      if (nextAppState === "active" && auth.currentUser) {
+        auth.currentUser
+          .reload()
+          .then(() => {
+            setIsVerified(auth.currentUser?.emailVerified ?? false);
+          })
+          .catch((error) => {
+            console.log("Error reloading user:", error);
+          });
+      }
+    });
+  }, [setIsVerified]);
 
   return (
-    <authContext.Provider value={{ user, login, logout }}>
+    <authContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        signup,
+        isVerified,
+        handleResendVerification,
+      }}
+    >
       {children}
     </authContext.Provider>
   );

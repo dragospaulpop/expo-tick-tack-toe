@@ -7,31 +7,28 @@ import { useAuthContext } from "@/hooks/use-auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, login, isVerified, handleResendVerification } =
-    useAuthContext();
+  const { user, signup } = useAuthContext();
 
   const [email, onChangeEmail] = useState("");
   const [password, onChangePassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handlePressLogin = useCallback(async () => {
+  const handleSignup = useCallback(async () => {
     if (email.trim().length === 0 || password.trim().length === 0) return;
 
-    const result = await login(email, password);
-    if (result && !result.success) {
+    const result = await signup(email, password);
+    if (result && result.success) {
+      router.replace("/game");
+    } else {
       setErrorMessage(result?.error?.message ?? "Unknown error");
     }
-  }, [email, password, login]);
-
-  const handlePressSignup = useCallback(async () => {
-    router.replace("/signup");
-  }, [router]);
+  }, [email, password, router, signup]);
 
   useEffect(() => {
-    if (user && user.uid && isVerified) {
+    if (user && user.uid) {
       router.replace("/game");
     }
-  }, [user, router, isVerified]);
+  }, [user, router]);
 
   return (
     <View style={styles.container}>
@@ -53,28 +50,12 @@ export default function LoginPage() {
         />
       </View>
       <View style={styles.row}>
-        <Button title="Login" onPress={handlePressLogin} />
+        <Button title="SignUp" onPress={handleSignup} />
       </View>
       <View style={styles.row}>
         {errorMessage.length > 0 && (
           <Text style={{ color: "red" }}>{errorMessage}</Text>
         )}
-      </View>
-      <View style={styles.row}>
-        {isVerified === false && (
-          <>
-            <Text style={{ color: "red" }}>
-              {`Email (${user?.email}) is not verified!`}
-            </Text>
-            <Button
-              title="Resend Verification Email"
-              onPress={handleResendVerification}
-            />
-          </>
-        )}
-      </View>
-      <View style={styles.row}>
-        <Button title="SignUp" onPress={handlePressSignup} />
       </View>
     </View>
   );

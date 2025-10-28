@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useState } from "react";
+import { useCurrentPlayerContext } from "./use-current-player-context";
 
 export type MatrixCell = string;
 
@@ -15,11 +16,7 @@ const matrixContext = createContext({
     [" ", " ", " "],
   ] as Matrix,
 
-  handleCellClick: (
-    rowNumber: number,
-    cellNumber: number,
-    currentPlayer: "X" | "O" | null
-  ) => {},
+  handleCellClick: (rowNumber: number, cellNumber: number) => {},
 
   resetMatrix: () => {},
 });
@@ -30,6 +27,8 @@ export function useMatrixContext() {
 }
 
 export function MatrixProvider({ children }: { children: React.ReactNode }) {
+  const { currentPlayer, setCurrentPlayer } = useCurrentPlayerContext();
+
   const [matrix, setMatrix] = useState<Matrix>([
     [" ", " ", " "],
     [" ", " ", " "],
@@ -45,11 +44,7 @@ export function MatrixProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleCellClick = useCallback(
-    (
-      rowNumber: number,
-      cellNumber: number,
-      currentPlayer: "X" | "O" | null
-    ) => {
+    (rowNumber: number, cellNumber: number) => {
       if (currentPlayer === null) {
         return;
       }
@@ -57,6 +52,8 @@ export function MatrixProvider({ children }: { children: React.ReactNode }) {
       if (matrix[rowNumber][cellNumber] !== " ") {
         return;
       }
+
+      setCurrentPlayer((prevPlayer) => (prevPlayer === "X" ? "O" : "X"));
 
       setMatrix((prevMatrix: Matrix) => {
         const newMatrix: Matrix = [...prevMatrix];
@@ -66,7 +63,7 @@ export function MatrixProvider({ children }: { children: React.ReactNode }) {
         return newMatrix;
       });
     },
-    [matrix, setMatrix]
+    [matrix, setMatrix, currentPlayer, setCurrentPlayer]
   );
 
   return (

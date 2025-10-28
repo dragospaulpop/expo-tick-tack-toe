@@ -1,4 +1,3 @@
-import { useCurrentPlayerContext } from "@/hooks/use-current-player-context";
 import { useMatrixContext } from "@/hooks/use-matrix-context";
 import { isWinnigPosition } from "@/lib/check-winner";
 import { Pressable, StyleSheet } from "react-native";
@@ -11,11 +10,9 @@ type CellType = {
 
 export default function PressableCell({ cellNumber, rowNumber }: CellType) {
   const { matrix, handleCellClick } = useMatrixContext();
-  const { currentPlayer, setCurrentPlayer } = useCurrentPlayerContext();
 
   const handleClickEvent = (rowNumber: number, cellNumber: number) => {
-    handleCellClick(rowNumber, cellNumber, currentPlayer);
-    setCurrentPlayer((prevPlayer) => (prevPlayer === "X" ? "O" : "X"));
+    handleCellClick(rowNumber, cellNumber);
   };
 
   return (

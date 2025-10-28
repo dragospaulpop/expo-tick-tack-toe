@@ -12,7 +12,7 @@ export default function Index() {
   const { currentPlayer, setCurrentPlayer } = useCurrentPlayerContext();
   const { matrix } = useMatrixContext();
   const [message, setMessage] = useState<string>("Current player: X");
-  const { user } = useAuthContext();
+  const { user, isVerified } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,10 +31,10 @@ export default function Index() {
   }, [currentPlayer]);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !isVerified) {
       router.replace("/login");
     }
-  }, [user, router]);
+  }, [user, router, isVerified]);
 
   return (
     <View style={styles.container}>
