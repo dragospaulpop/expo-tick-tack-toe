@@ -1,35 +1,34 @@
-import { useCallback, useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Button, StyleSheet, Text, TextInput, View } from "react-native";
 
-import { auth } from "@/lib/firebase.config";
 import { useRouter } from "expo-router";
-import { FirebaseError } from "firebase/app";
-import { signInWithEmailAndPassword } from "firebase/auth";
+
+import { useAuthContext } from "@/hooks/use-auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { user, login } = useAuthContext();
+
   const [email, onChangeEmail] = useState("");
   const [password, onChangePassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handlePressLogin = useCallback(async () => {
     if (email.trim().length === 0 || password.trim().length === 0) return;
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-
+    const result = await login(email, password);
+    if (result && result.success) {
       router.replace("/game");
-    } catch (error: FirebaseError | any) {
-      Alert.alert("Login Error", error?.message ?? "Unknown error", [
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
-        },
-        { text: "OK", onPress: () => console.log("OK Pressed") },
-      ]);
-      return;
+    } else {
+      setErrorMessage(result?.error?.message ?? "Unknown error");
     }
-  }, [email, password]);
+  }, [email, password, router, login]);
+
+  useEffect(() => {
+    if (user && user.uid) {
+      router.replace("/game");
+    }
+  }, [user, router]);
 
   return (
     <View style={styles.container}>
@@ -47,10 +46,16 @@ export default function LoginPage() {
           style={styles.input}
           onChangeText={onChangePassword}
           value={password}
+          secureTextEntry
         />
       </View>
       <View style={styles.row}>
         <Button title="Login" onPress={handlePressLogin} />
+      </View>
+      <View style={styles.row}>
+        {errorMessage.length > 0 && (
+          <Text style={{ color: "red" }}>{errorMessage}</Text>
+        )}
       </View>
     </View>
   );

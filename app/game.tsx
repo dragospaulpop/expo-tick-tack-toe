@@ -1,8 +1,10 @@
 import { ThemedText } from "@/components/themed-text";
 import Row from "@/components/ui/row";
+import { useAuthContext } from "@/hooks/use-auth-context";
 import { useCurrentPlayerContext } from "@/hooks/use-current-player-context";
 import { useMatrixContext } from "@/hooks/use-matrix-context";
 import { checkWinner } from "@/lib/check-winner";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -10,6 +12,8 @@ export default function Index() {
   const { currentPlayer, setCurrentPlayer } = useCurrentPlayerContext();
   const { matrix } = useMatrixContext();
   const [message, setMessage] = useState<string>("Current player: X");
+  const { user } = useAuthContext();
+  const router = useRouter();
 
   useEffect(() => {
     const winner = checkWinner(matrix);
@@ -25,6 +29,12 @@ export default function Index() {
     }
     setMessage(`Current player: ${currentPlayer}`);
   }, [currentPlayer]);
+
+  useEffect(() => {
+    if (!user) {
+      router.replace("/login");
+    }
+  }, [user, router]);
 
   return (
     <View style={styles.container}>

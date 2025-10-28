@@ -17,6 +17,7 @@ export const Colors = {
     tabIconDefault: "#687076",
     tabIconSelected: tintColorLight,
     resetButton: tintColorLight,
+    logoutButton: "#ff0000",
   },
   dark: {
     text: "#ECEDEE",
@@ -26,6 +27,7 @@ export const Colors = {
     tabIconDefault: "#9BA1A6",
     tabIconSelected: tintColorDark,
     resetButton: tintColorLight,
+    logoutButton: "#ff0000",
   },
 };
 
