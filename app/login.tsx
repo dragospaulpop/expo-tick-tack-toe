@@ -29,7 +29,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user && user.uid && isVerified) {
-      router.replace("/game");
+      router.replace("/(tabs)/users");
     }
   }, [user, router, isVerified]);
 

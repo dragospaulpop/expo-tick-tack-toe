@@ -116,7 +116,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     AppState.addEventListener("change", (nextAppState: any) => {
-      console.log("AppState changed to", nextAppState);
       if (nextAppState === "active" && auth.currentUser) {
         auth.currentUser
           .reload()

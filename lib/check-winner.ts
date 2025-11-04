@@ -1,4 +1,4 @@
-import { Matrix } from "@/hooks/use-matrix-context";
+export type Matrix2D = ("X" | "O" | null)[][];
 
 export type Winner = {
   winner: "X" | "O" | null;
@@ -11,7 +11,7 @@ export type Winner = {
     | [];
 };
 
-export function checkWinner(matrix: Matrix): Winner {
+export function checkWinner(matrix: Matrix2D): Winner {
   // check rows
   for (let i = 0; i < 3; i++) {
     if (
